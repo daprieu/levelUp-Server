@@ -1,0 +1,13 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "levelup",
+            "database": "db.sqlite3"
+        }
+    ],
+    "python.pythonPath": "/Users/danielprieu/.local/share/virtualenvs/levelup-LMW7mXWJ/bin/python",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": false
+}
