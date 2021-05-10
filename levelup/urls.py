@@ -16,8 +16,6 @@ Including another URLconf
 from rest_framework import routers
 
 from levelupapi.views import GameView, GameTypeView, EventView
-# from levelupapi.views.gametype import GameTypeView
-# from levelupapi.views.game import GameView
 from django.conf.urls import include
 from django.urls import path
 from levelupapi.views import register_user, login_user
