@@ -10,12 +10,12 @@ class Event(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     date = models.CharField(max_length=50)
     time = models.CharField(max_length=50)
-    joined = models.BooleanField()
+    attendees = models.ManyToManyField("Gamer", through="gameEvent", related_name="attending")
+    
+    @property
+    def joined(self):
+        return self.__joined
 
-@property
-def joined(self):
-    return self.__joined
-
-@joined.setter
-def joined(self, value):
-    self.__joined = value
+    @joined.setter
+    def joined(self, value):
+        self.__joined = value

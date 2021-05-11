@@ -102,85 +102,43 @@ class EventView(ViewSet):
 
         # Set the `joined` property on every event
         for event in events:
-            event.joined = None
-
-            try:
-                GameEvent.objects.get(event=event, gamer=gamer)
-                event.joined = True
-            except GameEvent.DoesNotExist:
-                event.joined = False
-
+            # Check to see if the gamer is in the attendees list on the event
+            event.joined = gamer in event.attendees.all()
+            
         # Support filtering events by game
         game = self.request.query_params.get('gameId', None)
         if game is not None:
-            events = events.filter(game__id=type)
+            events = events.filter(game__id=game)
 
         serializer = EventSerializer(
             events, many=True, context={'request': request})
         return Response(serializer.data)
-
+    
     @action(methods=['post', 'delete'], detail=True)
-    def signup(self, request, pk=None):
-        """Managing gamers signing up for events"""
-
-        # A gamer wants to sign up for an event
-        if request.method == "POST":
-            # The pk would be `2` if the URL above was requested
+    def signup(self, request, pk):
+        # /events/<event_id>/signup
+        gamer = Gamer.objects.get(user=request.auth.user)
+        try:
             event = Event.objects.get(pk=pk)
+        except Event.DoesNotExist:
+            return Response(
+            {'message': 'Event does not exist.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-            # Django uses the `Authorization` header to determine
-            # which user is making the request to sign up
-            gamer = Gamer.objects.get(user=request.auth.user)
-
+        if request.method == "POST":
             try:
-                # Determine if the user is already signed up
-                registration = GameEvent.objects.get(
-                    event=event, gamer=gamer)
-                return Response(
-                    {'message': 'Gamer already signed up this event.'},
-                    status=status.HTTP_422_UNPROCESSABLE_ENTITY
-                )
-            except GameEvent.DoesNotExist:
-                # The user is not signed up.
-                registration = GameEvent()
-                registration.event = event
-                registration.gamer = gamer
-                registration.save()
-
+                event.attendees.add(gamer)
                 return Response({}, status=status.HTTP_201_CREATED)
-
-        # User wants to leave a previously joined event
+            except Exception as ex:
+                return Response({'message': ex.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         elif request.method == "DELETE":
-            # Handle the case if the client specifies a game
-            # that doesn't exist
             try:
-                event = Event.objects.get(pk=pk)
-            except Event.DoesNotExist:
-                return Response(
-                    {'message': 'Event does not exist.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                event.attendees.remove(gamer)
+                return Response({}, status=status.HTTP_204_NO_CONTENT)
+            except Exception as ex:
+                return Response({'message': ex.args[0]}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            # Get the authenticated user
-            gamer = Gamer.objects.get(user=request.auth.user)
-
-            try:
-                # Try to delete the signup
-                registration = GameEvent.objects.get(
-                    event=event, gamer=gamer)
-                registration.delete()
-                return Response(None, status=status.HTTP_204_NO_CONTENT)
-
-            except GameEvent.DoesNotExist:
-                return Response(
-                    {'message': 'Not currently registered for event.'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-
-        # If the client performs a request with a method of
-        # anything other than POST or DELETE, tell client that
-        # the method is not supported
-        return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class EventUserSerializer(serializers.ModelSerializer):
     """JSON serializer for event organizer's related Django user"""
@@ -206,8 +164,7 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
             model = Event
             fields = ('id', 'game', 'organizer',
-          'description', 'date', 'time',
-          'joined')
+            'description', 'date', 'time', 'attendees', 'joined')
 
 class GameSerializer(serializers.ModelSerializer):
     """JSON serializer for games"""
