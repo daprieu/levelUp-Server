@@ -3,7 +3,6 @@ from django.db import models
 from .game import Game
 from django.db.models.deletion import SET_NULL
 
-
 class Event(models.Model):
 
     organizer = models.ForeignKey(Gamer, on_delete=SET_NULL, null=True)
@@ -11,3 +10,12 @@ class Event(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     date = models.CharField(max_length=50)
     time = models.CharField(max_length=50)
+    joined = models.BooleanField()
+
+@property
+def joined(self):
+    return self.__joined
+
+@joined.setter
+def joined(self, value):
+    self.__joined = value
