@@ -28,14 +28,14 @@ class GameView(ViewSet):
         game = Game()
         game.title = request.data["title"]
         game.maker = request.data["maker"]
-        game.number_of_players = request.data["number_of_players"]
-        game.skill_level = request.data["skill_level"]
+        game.number_of_players = request.data["numberOfPlayers"]
+        game.skill_level = request.data["skillLevel"]
         game.gamer = gamer
 
         # Use the Django ORM to get the record from the database
         # whose `id` is what the client passed as the
         # `gameTypeId` in the body of the request.
-        gametype = GameType.objects.get(pk=request.data["game_type"])
+        gametype = GameType.objects.get(pk=request.data["gameType"])
         game.game_type = gametype
 
         # Try to save the new game to the database, then
@@ -86,8 +86,8 @@ class GameView(ViewSet):
         game = Game.objects.get(pk=pk)
         game.title = request.data["title"]
         game.maker = request.data["maker"]
-        game.number_of_players = request.data["number_of_players"]
-        game.skill_level = request.data["skill_level"]
+        game.number_of_players = request.data["numberOfPlayers"]
+        game.skill_level = request.data["skillLevel"]
         game.gamer = gamer
 
         gametype = GameType.objects.get(pk=request.data["gameTypeId"])
@@ -129,7 +129,7 @@ class GameView(ViewSet):
         #    http://localhost:8000/games?type=1
         #
         # That URL will retrieve all tabletop games
-        game_type = request.query_params.get('game_type', None)
+        game_type = request.query_params.get('gameType', None)
         if game_type is not None:
             games = games.filter(game_type__id=game_type)
 
