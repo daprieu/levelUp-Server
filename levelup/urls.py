@@ -15,7 +15,7 @@ Including another URLconf
 """
 from rest_framework import routers
 
-from levelupapi.views import GameView, GameTypeView, EventView
+from levelupapi.views import GameView, GameTypeView, EventView, Profile
 from django.conf.urls import include
 from django.urls import path
 from levelupapi.views import register_user, login_user
@@ -24,6 +24,8 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'gametypes', GameTypeView, 'gametype')
 router.register(r'games', GameView, 'game')
 router.register(r'events', EventView, 'event')
+router.register(r'profile', Profile, 'profile')
+
 
 
 urlpatterns = [
