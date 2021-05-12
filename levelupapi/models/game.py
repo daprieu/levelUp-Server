@@ -12,10 +12,10 @@ class Game(models.Model):
     gamer = models.ForeignKey(Gamer, on_delete=SET_NULL, null=True)
     game_type = models.ForeignKey(GameType, on_delete=SET_NULL, null=True)
 
-    # @property
-    # def event_count(self):
-    #     return self.__event_count
+    @property
+    def event_count(self):
+        return self.__event_count
 
-    # @event_count.setter
-    # def event_count(self, value):
-    #     self.__event_count = value
+    @event_count.setter
+    def event_count(self, value):
+        self.__event_count = value

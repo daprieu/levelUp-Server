@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from levelupapi.models import Game, Event, Gamer
 from levelupapi.views.game import GameSerializer
+from django.db.models import Count
 
 
 class EventView(ViewSet):
@@ -98,7 +99,7 @@ class EventView(ViewSet):
         """
         # Get the current authenticated user
         gamer = Gamer.objects.get(user=request.auth.user)
-        events = Event.objects.all()
+        events = Event.objects.annotate(attendee_count=Count('attendees'))
 
         # Set the `joined` property on every event
         for event in events:
@@ -164,7 +165,7 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
             model = Event
             fields = ('id', 'game', 'organizer',
-            'description', 'date', 'time', 'attendees', 'joined')
+            'description', 'date', 'time', 'attendees', 'joined', 'attendee_count')
 
 class GameSerializer(serializers.ModelSerializer):
     """JSON serializer for games"""
