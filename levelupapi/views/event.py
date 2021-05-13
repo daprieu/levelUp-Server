@@ -11,6 +11,7 @@ from rest_framework import serializers
 from levelupapi.models import Game, Event, Gamer
 from levelupapi.views.game import GameSerializer
 from django.db.models import Count
+from django.db.models import Q
 
 
 class EventView(ViewSet):
@@ -99,12 +100,17 @@ class EventView(ViewSet):
         """
         # Get the current authenticated user
         gamer = Gamer.objects.get(user=request.auth.user)
-        events = Event.objects.annotate(attendee_count=Count('attendees'))
+        events = Event.objects.annotate(
+            attendee_count=Count('attendees'),
+            joined=Count(
+            'attendees',
+            filter=Q(attendees=gamer)
+            ))
 
         # Set the `joined` property on every event
         for event in events:
             # Check to see if the gamer is in the attendees list on the event
-            event.joined = gamer in event.attendees.all()
+            event.joined = bool(event.joined)
             
         # Support filtering events by game
         game = self.request.query_params.get('gameId', None)
