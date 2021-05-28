@@ -3,7 +3,7 @@ SELECT
     g.id,
     g.title,
     g.maker,
-    g.gametype_id,
+    g.game_type_id,
     g.number_of_players,
     g.skill_level,
     u.id user_id,
