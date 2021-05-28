@@ -72,9 +72,10 @@ class GameView(ViewSet):
             game = Game.objects.get(pk=pk)
             serializer = GameSerializer(game, context={'request': request})
             return Response(serializer.data)
+        except Game.DoesNotExist as ex:
+            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
         except Exception as ex:
             return HttpResponseServerError(ex)
-
     def update(self, request, pk=None):
         """Handle PUT requests for a game
 
@@ -82,11 +83,15 @@ class GameView(ViewSet):
             Response -- Empty body with 204 status code
         """
         gamer = Gamer.objects.get(user=request.auth.user)
+        game = Game.objects.get(pk=pk)
 
         # Do mostly the same thing as POST, but instead of
         # creating a new instance of Game, get the game record
         # from the database whose primary key is `pk`
-        game = Game.objects.get(pk=pk)
+
+        if gamer.id is not game.gamer.id:
+            return Response({}, status=status.HTTP_403_FORBIDDEN)
+
         game.title = request.data["title"]
         game.maker = request.data["maker"]
         game.number_of_players = request.data["numberOfPlayers"]
